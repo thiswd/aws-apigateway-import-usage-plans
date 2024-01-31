@@ -12,7 +12,7 @@ class UsagePlanImporter
     usage_plans_count = 0
     error_count = 0
 
-    usage_plans["items"].each do |plan|
+    usage_plans.each do |plan|
       begin
         response = create_usage_plan(plan)
         usage_plans_count += 1
@@ -44,7 +44,7 @@ class UsagePlanImporter
   def read_usage_plans
     begin
       file = File.read(file_path)
-      JSON.parse(file)
+      usage_plans = JSON.parse(file)
     rescue Errno::ENOENT => e
       puts "Error: File not found - #{e.message}"
       exit
@@ -56,6 +56,13 @@ class UsagePlanImporter
       exit
     rescue StandardError => e
       puts "An unexpected error occurred - #{e.message}"
+      exit
+    end
+
+    if usage_plans.has_key?("items")
+      usage_plans["items"]
+    else
+      puts "No usage plans found in #{file_path}"
       exit
     end
   end
