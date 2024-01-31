@@ -20,8 +20,10 @@ if !options[:region] || !options[:file]
   exit
 end
 
+input_file = options[:file]
+
 begin
-  file = File.read(options[:file])
+  file = File.read(input_file)
   usage_plans = JSON.parse(file)
 rescue Errno::ENOENT => e
   puts "Error: File not found - #{e.message}"
@@ -60,4 +62,14 @@ usage_plans["items"].each do |plan|
   rescue Aws::APIGateway::Errors::ServiceError => e
     puts "Failed to create usage plan: #{e.message}"
   end
+end
+
+begin
+  puts "Deleting #{input_file}..."
+  File.delete(input_file)
+  puts "#{input_file} has been successfully deleted."
+rescue Errno::ENOENT
+  puts "Error: The file #{input_file} does not exist."
+rescue StandardError => e
+  puts "An error occurred while deleting the file #{input_file}: #{e.message}"
 end
