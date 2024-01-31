@@ -41,6 +41,9 @@ end
 
 apigateway = Aws::APIGateway::Client.new(region: options[:region])
 
+usage_plans_count = 0
+error_count = 0
+
 usage_plans["items"].each do |plan|
   throttle_params = plan["throttle"] ? {
     burst_limit: plan["throttle"]["burstLimit"].to_i,
@@ -59,10 +62,15 @@ usage_plans["items"].each do |plan|
       throttle: throttle_params,
       quota: quota_params
     })
+    usage_plans_count += 1
   rescue Aws::APIGateway::Errors::ServiceError => e
     puts "Failed to create usage plan: #{e.message}"
+    error_count += 1
   end
 end
+
+puts "Total usage plans imported: #{api_keys_count}"
+puts "Total errors: #{error_count}"
 
 begin
   puts "Deleting #{input_file}..."
