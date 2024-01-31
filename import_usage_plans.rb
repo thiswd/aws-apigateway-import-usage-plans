@@ -41,43 +41,48 @@ end
 
 apigateway = Aws::APIGateway::Client.new(region: options[:region])
 
-usage_plans_count = 0
-error_count = 0
+begin
+  usage_plans_count = 0
+  error_count = 0
 
-usage_plans["items"].each do |plan|
-  throttle_params = plan["throttle"] ? {
-    burst_limit: plan["throttle"]["burstLimit"].to_i,
-    rate_limit: plan["throttle"]["rateLimit"].to_f
-  } : nil
+  usage_plans["items"].each do |plan|
+    throttle_params = plan["throttle"] ? {
+      burst_limit: plan["throttle"]["burstLimit"].to_i,
+      rate_limit: plan["throttle"]["rateLimit"].to_f
+    } : nil
 
-  quota_params = plan["quota"] ? {
-    limit: plan["quota"]["limit"].to_i,
-    offset: plan["quota"]["offset"].to_i,
-    period: plan["quota"]["period"]
-  } : nil
+    quota_params = plan["quota"] ? {
+      limit: plan["quota"]["limit"].to_i,
+      offset: plan["quota"]["offset"].to_i,
+      period: plan["quota"]["period"]
+    } : nil
+
+    begin
+      response = apigateway.create_usage_plan({
+        name: plan["name"],
+        throttle: throttle_params,
+        quota: quota_params
+      })
+      usage_plans_count += 1
+    rescue Aws::APIGateway::Errors::ServiceError => e
+      puts "Failed to create usage plan: #{e.message}"
+      error_count += 1
+    end
+  end
+
+  puts "Total usage plans imported: #{usage_plans_count}"
+  puts "Total errors: #{error_count}"
 
   begin
-    response = apigateway.create_usage_plan({
-      name: plan["name"],
-      throttle: throttle_params,
-      quota: quota_params
-    })
-    usage_plans_count += 1
-  rescue Aws::APIGateway::Errors::ServiceError => e
-    puts "Failed to create usage plan: #{e.message}"
-    error_count += 1
+    puts "Deleting #{input_file}..."
+    File.delete(input_file)
+    puts "#{input_file} has been successfully deleted."
+  rescue Errno::ENOENT
+    puts "Error: The file #{input_file} does not exist."
+  rescue StandardError => e
+    puts "An error occurred while deleting the file #{input_file}: #{e.message}"
   end
-end
 
-puts "Total usage plans imported: #{api_keys_count}"
-puts "Total errors: #{error_count}"
-
-begin
-  puts "Deleting #{input_file}..."
-  File.delete(input_file)
-  puts "#{input_file} has been successfully deleted."
-rescue Errno::ENOENT
-  puts "Error: The file #{input_file} does not exist."
 rescue StandardError => e
-  puts "An error occurred while deleting the file #{input_file}: #{e.message}"
+  puts "An error occurred: #{e.message}"
 end
