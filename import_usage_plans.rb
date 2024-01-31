@@ -1,8 +1,27 @@
-require "json"
 require "aws-sdk-apigateway"
+require "json"
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: ruby import_usage_plans.rb --region REGION --file FILE"
+
+  opts.on("--region REGION", "AWS Region") do |region|
+    options[:region] = region
+  end
+
+  opts.on("--file FILE", "Path to the usage_plans.json file") do |file|
+    options[:file] = file
+  end
+end.parse!
+
+if !options[:region] || !options[:file]
+  puts "Both --region and --file arguments are required"
+  exit
+end
 
 begin
-  file = File.read("usage_plans.json")
+  file = File.read(options[:file])
   usage_plans = JSON.parse(file)
 rescue Errno::ENOENT => e
   puts "Error: File not found - #{e.message}"
@@ -18,7 +37,7 @@ rescue StandardError => e
   exit
 end
 
-apigateway = Aws::APIGateway::Client.new(region: "sa-east-1")
+apigateway = Aws::APIGateway::Client.new(region: options[:region])
 
 usage_plans["items"].each do |plan|
   throttle_params = plan["throttle"] ? {
