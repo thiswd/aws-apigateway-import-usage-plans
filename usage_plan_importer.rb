@@ -24,8 +24,7 @@ class UsagePlanImporter
       end
     end
 
-    puts "Total usage plans imported: #{usage_plans_count}"
-    puts "Total errors: #{error_count}"
+    print_results(usage_plans_count, error_count)
   end
 
   def delete_input_file
@@ -85,5 +84,10 @@ class UsagePlanImporter
       throttle: throttle_params,
       quota: quota_params
     })
+  end
+
+  def print_results(usage_plans_count, error_count)
+    puts "Total usage plans imported: #{usage_plans_count}"
+    puts "Total errors: #{error_count}"
   end
 end
