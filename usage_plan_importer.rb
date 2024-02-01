@@ -8,6 +8,13 @@ class UsagePlanImporter
     @file_path = file_path
   end
 
+  def execute
+    import_usage_plans
+    delete_input_file
+  end
+
+  private
+
   def import_usage_plans
     usage_plans = read_usage_plans
     usage_plans_count = 0
@@ -38,8 +45,6 @@ class UsagePlanImporter
       puts "An error occurred while deleting the file #{@file_path}: #{e.message}"
     end
   end
-
-  private
 
   def read_usage_plans
     begin

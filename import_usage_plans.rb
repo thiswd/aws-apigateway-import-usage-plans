@@ -5,8 +5,7 @@ class ImportUsagePlans
   def self.run
     options = parse_arguments
     importer = UsagePlanImporter.new(options[:region], options[:file])
-    importer.import_usage_plans
-    importer.delete_input_file
+    importer.execute
   end
 
   private
