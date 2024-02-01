@@ -1,7 +1,8 @@
 require 'aws-sdk-apigateway'
 require 'json'
+
 class UsagePlanImporter
-  attr_reader :apigateway, :file_path
+
   def initialize(region, file_path)
     @apigateway = Aws::APIGateway::Client.new(region: region)
     @file_path = file_path
@@ -29,13 +30,13 @@ class UsagePlanImporter
 
   def delete_input_file
     begin
-      puts "Deleting #{file_path}..."
-      File.delete(file_path)
-      puts "#{file_path} has been successfully deleted."
+      puts "Deleting #{@file_path}..."
+      File.delete(@file_path)
+      puts "#{@file_path} has been successfully deleted."
     rescue Errno::ENOENT
-      puts "Error: The file #{file_path} does not exist."
+      puts "Error: The file #{@file_path} does not exist."
     rescue StandardError => e
-      puts "An error occurred while deleting the file #{file_path}: #{e.message}"
+      puts "An error occurred while deleting the file #{@file_path}: #{e.message}"
     end
   end
 
@@ -43,7 +44,7 @@ class UsagePlanImporter
 
   def read_usage_plans
     begin
-      file = File.read(file_path)
+      file = File.read(@file_path)
       usage_plans = JSON.parse(file)
     rescue Errno::ENOENT => e
       puts "Error: File not found - #{e.message}"
@@ -62,7 +63,7 @@ class UsagePlanImporter
     if usage_plans.has_key?("items")
       usage_plans["items"]
     else
-      puts "No usage plans found in #{file_path}"
+      puts "No usage plans found in #{@file_path}"
       exit
     end
   end
@@ -79,7 +80,7 @@ class UsagePlanImporter
       period: plan["quota"]["period"]
     } : nil
 
-    apigateway.create_usage_plan({
+    @apigateway.create_usage_plan({
       name: plan["name"],
       throttle: throttle_params,
       quota: quota_params
