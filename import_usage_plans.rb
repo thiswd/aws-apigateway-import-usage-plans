@@ -9,6 +9,8 @@ class ImportUsagePlans
     importer.delete_input_file
   end
 
+  private
+
   def self.parse_arguments
     options = {}
     OptionParser.new do |opts|
@@ -21,8 +23,6 @@ class ImportUsagePlans
     validate_arguments(options)
     options
   end
-
-  private
 
   def self.validate_arguments(options)
     missing_args = []
