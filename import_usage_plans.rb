@@ -1,5 +1,5 @@
 require 'optparse'
-require_relative 'usage_plan_importer'
+require_relative 'lib/usage_plan_importer'
 
 class ImportUsagePlans
   USAGE_INSTRUCTION = "Usage: ruby import_usage_plans.rb --region REGION --file FILE".freeze
