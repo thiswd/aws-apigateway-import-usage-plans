@@ -2,6 +2,8 @@ require 'optparse'
 require_relative 'usage_plan_importer'
 
 class ImportUsagePlans
+  USAGE_INSTRUCTION = "Usage: ruby import_usage_plans.rb --region REGION --file FILE".freeze
+
   def self.run
     options = parse_arguments
     importer = UsagePlanImporter.new(options[:region], options[:file])
@@ -13,7 +15,7 @@ class ImportUsagePlans
   def self.parse_arguments
     options = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: ruby import_usage_plans.rb --region REGION --file FILE"
+      opts.banner = USAGE_INSTRUCTION
 
       opts.on("--region REGION", "AWS Region") { |region| options[:region] = region }
       opts.on("--file FILE", "Path to the usage_plans.json file") { |file| options[:file] = file }
@@ -30,7 +32,7 @@ class ImportUsagePlans
 
     if missing_args.any?
       puts "Missing arguments: #{missing_args.join(', ')}"
-      puts "Usage: ruby import_usage_plans.rb --region REGION --file FILE"
+      puts USAGE_INSTRUCTION
       exit
     end
   end
